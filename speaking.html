@@ -1,0 +1,611 @@
+
+<!-- THE SOUND WITHIN — RANDOM HARMONIC PITCH TEST -->
+<section id="swt-pitch-test">
+  <style>
+    #swt-pitch-test {
+      --blue: #6086bf;
+      --pale: #edf4ff;
+      font-family: Arial, sans-serif;
+      background: #f4f8ff;
+      color: #294465;
+      padding: 28px 20px;
+      border-radius: 22px;
+      max-width: 760px;
+      margin: 24px auto;
+    }
+    #swt-pitch-test * { box-sizing: border-box; }
+    #swt-pitch-test h2 { font-size: 29px; margin: 12px 0; }
+    #swt-pitch-test p { line-height: 1.65; }
+    #swt-pitch-test .muted { color: #788aa2; font-size: 14px; }
+    #swt-pitch-test .panel {
+      background: white;
+      border: 1px solid #e0eaf8;
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 18px;
+    }
+    #swt-pitch-test button,
+    #swt-pitch-test select {
+      font: inherit;
+      font-size: 14px;
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 15px;
+    }
+    #swt-pitch-test button { cursor: pointer; font-weight: bold; }
+    #swt-pitch-test button:disabled { opacity: .45; cursor: not-allowed; }
+    #swt-pitch-test .primary { background: var(--blue); color: white; }
+    #swt-pitch-test .secondary { background: #e5eefb; color: #456895; }
+    #swt-pitch-test .row { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 12px; }
+    #swt-pitch-test .row button { flex: 1 1 150px; }
+    #swt-pitch-test .status {
+      background: var(--pale);
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 16px;
+      line-height: 1.65;
+      min-height: 55px;
+      font-size: 14px;
+    }
+    #swt-pitch-test .sequence {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 18px;
+    }
+    #swt-pitch-test .step {
+      background: #f7faff;
+      border: 1px solid #e0eaf8;
+      border-radius: 12px;
+      padding: 13px 5px;
+      text-align: center;
+    }
+    #swt-pitch-test .step.active { border: 2px solid var(--blue); background: #eaf2ff; }
+    #swt-pitch-test .step.done { background: #e8f7ee; border-color: #8bc7a4; }
+    #swt-pitch-test .step .number { font-size: 19px; font-weight: bold; }
+    #swt-pitch-test .step .small { font-size: 11px; color: #788aa2; margin-top: 5px; }
+    #swt-pitch-test .score { font-size: 25px; font-weight: bold; color: var(--blue); }
+    #swt-pitch-test .note { font-size: 12px; color: #8292a7; margin-top: 18px; }
+    @media(max-width: 450px) {
+      #swt-pitch-test { padding: 22px 13px; }
+      #swt-pitch-test h2 { font-size: 24px; }
+      #swt-pitch-test .sequence { gap: 5px; }
+      #swt-pitch-test .step { padding: 10px 2px; }
+    }
+  </style>
+
+  <div style="text-align:center">
+    <div style="font-size:12px;letter-spacing:2px;color:#6689bd;font-weight:bold">
+      THE SOUND WITHIN
+    </div>
+    <h2>Harmonic Pitch Test</h2>
+    <p class="muted">
+      Listen to the progression. Hum each chord's root note.
+      Let your ears guide you.
+    </p>
+  </div>
+
+  <div class="panel">
+    <label for="swt-key"><strong>Key</strong></label>
+    <select id="swt-key" style="width:100%;margin-top:8px;background:#f4f8ff">
+      <option value="C">C Major</option>
+      <option value="D">D Major</option>
+      <option value="E">E Major</option>
+      <option value="F">F Major</option>
+      <option value="G">G Major</option>
+      <option value="A">A Major</option>
+      <option value="Bb">B♭ Major</option>
+    </select>
+
+    <div class="row">
+      <button class="primary" id="swt-new">Generate New Progression</button>
+      <button class="secondary" id="swt-tonic">Play Tonic Reference</button>
+    </div>
+
+    <div class="sequence" id="swt-sequence"></div>
+
+    <div style="margin-top:20px">
+      <strong id="swt-current-title">Ready to begin</strong>
+      <p class="muted" id="swt-instruction">
+        Generate a progression, then play the first chord.
+      </p>
+    </div>
+
+    <div class="row">
+      <button class="primary" id="swt-play">▶ Play Current Chord</button>
+      <button class="secondary" id="swt-mic">🎤 Hum This Chord</button>
+    </div>
+
+    <div class="status" id="swt-status" aria-live="polite">
+      Generate a progression to start.
+    </div>
+
+    <div class="row">
+      <button class="secondary" id="swt-next" disabled>Next Chord →</button>
+      <button class="secondary" id="swt-replay" disabled>Replay Chord</button>
+    </div>
+
+    <div class="panel" style="background:#f9fbff">
+      <div class="muted">Current round score</div>
+      <div class="score" id="swt-score">0 / 0</div>
+      <p class="muted" id="swt-summary">
+        Your results will appear here as you complete the progression.
+      </p>
+    </div>
+
+    <p class="note">
+      Pitch detection checks the frequency of your humming. This version
+      assesses the root note of each chord, not the complete chord quality.
+      Microphone access requires permission and usually HTTPS or localhost.
+    </p>
+  </div>
+
+  <script>
+    (function () {
+      const root = document.getElementById("swt-pitch-test");
+      if (!root || root.dataset.ready) return;
+      root.dataset.ready = "true";
+
+      const $ = id => root.querySelector("#" + id);
+
+      const keys = {
+        C: 60, D: 62, E: 64, F: 65, G: 67, A: 69, Bb: 70
+      };
+
+      // Major-key scale degrees and triad intervals.
+      const degrees = [
+        { roman: "I",   offset: 0,  triad: [0, 4, 7] },
+        { roman: "ii",  offset: 2,  triad: [0, 3, 7] },
+        { roman: "iii", offset: 4,  triad: [0, 3, 7] },
+        { roman: "IV",  offset: 5,  triad: [0, 4, 7] },
+        { roman: "V",   offset: 7,  triad: [0, 4, 7] },
+        { roman: "vi",  offset: 9,  triad: [0, 3, 7] }
+      ];
+
+      const noteNames = [
+        "C", "C♯", "D", "E♭", "E", "F",
+        "F♯", "G", "A♭", "A", "B♭", "B"
+      ];
+
+      let audio = null;
+      let micStream = null;
+      let progression = [];
+      let index = 0;
+      let results = [];
+      let previousProgression = "";
+      let busy = false;
+
+      function status(message) {
+        $("swt-status").textContent = message;
+      }
+
+      function getAudio() {
+        if (!audio) {
+          const AudioContextClass =
+            window.AudioContext || window.webkitAudioContext;
+          if (!AudioContextClass) {
+            throw new Error("Your browser does not support Web Audio.");
+          }
+          audio = new AudioContextClass();
+        }
+
+        if (audio.state === "suspended") {
+          return audio.resume().then(() => audio);
+        }
+
+        return Promise.resolve(audio);
+      }
+
+      function frequency(midi) {
+        return 440 * Math.pow(2, (midi - 69) / 12);
+      }
+
+      function midiName(midi) {
+        return noteNames[((Math.round(midi) % 12) + 12) % 12];
+      }
+
+      function chordRoot(degree) {
+        return keys[$("swt-key").value] + degree.offset;
+      }
+
+      function playMidiNotes(notes, duration = 1.1) {
+        return getAudio().then(ctx => {
+          const start = ctx.currentTime + 0.05;
+
+          notes.forEach(midi => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.type = "triangle";
+            osc.frequency.value = frequency(midi);
+
+            gain.gain.setValueAtTime(0.0001, start);
+            gain.gain.exponentialRampToValueAtTime(0.12, start + 0.04);
+            gain.gain.setValueAtTime(0.12, start + duration * 0.65);
+            gain.gain.exponentialRampToValueAtTime(
+              0.0001, start + duration
+            );
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(start);
+            osc.stop(start + duration + 0.03);
+          });
+        });
+      }
+
+      function playCurrentChord() {
+        if (!progression.length) {
+          status("Generate a progression first.");
+          return Promise.resolve();
+        }
+
+        const degree = progression[index];
+        const base = chordRoot(degree);
+
+        // Chord tones are generated from the selected key.
+        return playMidiNotes(
+          degree.triad.map(interval => base + interval),
+          1.25
+        );
+      }
+
+      function generateProgression() {
+        // Four to six chords, chosen anew each round.
+        // Avoid duplicating the immediately previous progression.
+        let next;
+        let signature;
+        let attempts = 0;
+
+        do {
+          const length = 4 + Math.floor(Math.random() * 3);
+          next = [];
+
+          while (next.length < length) {
+            const candidate = degrees[
+              Math.floor(Math.random() * degrees.length)
+            ];
+
+            // Avoid immediate repetition, but allow the same function later.
+            if (
+              next.length === 0 ||
+              next[next.length - 1].roman !== candidate.roman
+            ) {
+              next.push(candidate);
+            }
+          }
+
+          signature = next.map(d => d.roman).join("-");
+          attempts++;
+        } while (
+          signature === previousProgression &&
+          attempts < 20
+        );
+
+        previousProgression = signature;
+        progression = next;
+        index = 0;
+        results = [];
+        busy = false;
+
+        renderSequence();
+        updateScore();
+        updateCurrent();
+
+        $("swt-summary").textContent =
+          "New progression generated. Listen to each chord and hum its root note.";
+        status("New progression ready. Press Play Current Chord.");
+      }
+
+      function renderSequence() {
+        const container = $("swt-sequence");
+        container.innerHTML = "";
+
+        progression.forEach((degree, i) => {
+          const card = document.createElement("div");
+          card.className = "step";
+          card.id = "swt-step-" + i;
+
+          const number = document.createElement("div");
+          number.className = "number";
+          number.textContent = "Chord " + (i + 1);
+
+          const small = document.createElement("div");
+          small.className = "small";
+          small.textContent = results[i]
+            ? (results[i].correct ? "Pitch matched" : "Try again")
+            : "Not answered";
+
+          card.appendChild(number);
+          card.appendChild(small);
+          container.appendChild(card);
+        });
+      }
+
+      function updateCurrent() {
+        if (!progression.length) return;
+
+        const degree = progression[index];
+        $("swt-current-title").textContent =
+          "Chord " + (index + 1) + " of " + progression.length;
+
+        $("swt-instruction").textContent =
+          "Listen to the chord, then hum its root note. Identify the pitch with your voice.";
+
+        progression.forEach((_, i) => {
+          const card = $("swt-step-" + i);
+          if (!card) return;
+
+          card.classList.toggle("active", i === index);
+          card.classList.toggle("done", Boolean(results[i]));
+
+          const small = card.querySelector(".small");
+          if (results[i]) {
+            small.textContent = results[i].correct
+              ? "✓ Matched"
+              : "✗ Not matched";
+          } else {
+            small.textContent = i === index
+              ? "Current chord"
+              : "Not answered";
+          }
+        });
+
+        $("swt-next").disabled = !results[index];
+        $("swt-replay").disabled = false;
+      }
+
+      function updateScore() {
+        const correct = results.filter(r => r && r.correct).length;
+        const completed = results.filter(Boolean).length;
+
+        $("swt-score").textContent =
+          correct + " / " + completed;
+
+        if (completed === progression.length && progression.length) {
+          const percentage = Math.round(
+            correct / progression.length * 100
+          );
+
+          $("swt-summary").textContent =
+            "Round completed: " + percentage +
+            "% root-note accuracy. Generate a new progression to continue.";
+        }
+      }
+
+      // Autocorrelation estimates the fundamental frequency of humming.
+      function detectPitch(buffer, sampleRate) {
+        const size = buffer.length;
+        let rms = 0;
+
+        for (let i = 0; i < size; i++) {
+          rms += buffer[i] * buffer[i];
+        }
+
+        rms = Math.sqrt(rms / size);
+
+        if (rms < 0.012) return null;
+
+        let bestOffset = -1;
+        let bestCorrelation = 0;
+        const minPeriod = Math.floor(sampleRate / 1000);
+        const maxPeriod = Math.min(
+          Math.floor(sampleRate / 70),
+          size - 1
+        );
+
+        for (let offset = minPeriod; offset <= maxPeriod; offset++) {
+          let correlation = 0;
+          let count = size - offset;
+
+          for (let i = 0; i < count; i++) {
+            correlation += buffer[i] * buffer[i + offset];
+          }
+
+          correlation /= count;
+
+          if (correlation > bestCorrelation) {
+            bestCorrelation = correlation;
+            bestOffset = offset;
+          }
+        }
+
+        if (bestOffset < 0 || bestCorrelation < 0.35) return null;
+
+        const pitch = sampleRate / bestOffset;
+
+        if (pitch < 70 || pitch > 1000) return null;
+
+        return {
+          frequency: pitch,
+          midi: 69 + 12 * Math.log2(pitch / 440),
+          confidence: bestCorrelation,
+          volume: rms
+        };
+      }
+
+      function requestMicrophone() {
+        if (!navigator.mediaDevices ||
+            !navigator.mediaDevices.getUserMedia) {
+          return Promise.reject(
+            new Error("Microphone access requires HTTPS or localhost.")
+          );
+        }
+
+        if (micStream) return Promise.resolve(micStream);
+
+        return navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false
+          }
+        }).then(stream => {
+          micStream = stream;
+          return stream;
+        });
+      }
+
+      function analyzeHumming() {
+        if (!progression.length || busy || results[index]) return;
+
+        busy = true;
+        $("swt-mic").disabled = true;
+        status("Requesting microphone access...");
+
+        Promise.all([requestMicrophone(), getAudio()])
+          .then(([stream, ctx]) => {
+            const source = ctx.createMediaStreamSource(stream);
+            const analyser = ctx.createAnalyser();
+
+            analyser.fftSize = 4096;
+            analyser.smoothingTimeConstant = 0;
+
+            source.connect(analyser);
+
+            const buffer = new Float32Array(analyser.fftSize);
+            const readings = [];
+            let frames = 0;
+            const maxFrames = 90;
+
+            status("Hum the root note steadily for about two seconds...");
+
+            function capture() {
+              if (!busy) {
+                source.disconnect();
+                return;
+              }
+
+              analyser.getFloatTimeDomainData(buffer);
+
+              const pitch = detectPitch(buffer, ctx.sampleRate);
+
+              if (pitch) readings.push(pitch);
+              frames++;
+
+              if (frames < maxFrames) {
+                requestAnimationFrame(capture);
+                return;
+              }
+
+              busy = false;
+              source.disconnect();
+              $("swt-mic").disabled = false;
+
+              if (readings.length < 8) {
+                status(
+                  "I couldn't detect a stable pitch. Try humming louder, " +
+                  "closer to the microphone, and hold one steady note."
+                );
+                return;
+              }
+
+              readings.sort((a, b) => a.midi - b.midi);
+
+              const middle = readings[Math.floor(readings.length / 2)];
+              const detectedMidi = Math.round(middle.midi);
+              const expectedMidi = chordRoot(progression[index]);
+
+              // Compare pitch class, so octave differences are accepted.
+              const detectedClass = ((detectedMidi % 12) + 12) % 12;
+              const expectedClass = ((expectedMidi % 12) + 12) % 12;
+
+              const distance = Math.min(
+                (detectedClass - expectedClass + 12) % 12,
+                (expectedClass - detectedClass + 12) % 12
+              );
+
+              // Allow a small tuning tolerance of approximately 50 cents.
+              const cents = Math.abs(middle.midi - expectedMidi);
+              const octaveAdjustedCents = Math.abs(
+                ((middle.midi - expectedMidi + 6) % 12 + 12) % 12 - 0
+              );
+
+              // Use semitone distance for robust pitch-class comparison.
+              const semitoneError = Math.abs(
+                ((middle.midi - expectedMidi + 18) % 12) - 6
+              );
+
+              const isCorrect = distance === 0 && semitoneError < 0.5;
+
+              results[index] = {
+                correct: isCorrect,
+                detectedMidi: detectedMidi,
+                expectedMidi: expectedMidi,
+                detectedNote: midiName(detectedMidi),
+                expectedNote: midiName(expectedMidi)
+              };
+
+              const expectedName = midiName(expectedMidi);
+              const detectedName = midiName(detectedMidi);
+
+              if (isCorrect) {
+                status(
+                  "✓ Pitch matched! Detected " + detectedName +
+                  ". The target root was " + expectedName + "."
+                );
+              } else {
+                status(
+                  "Not matched. Detected " + detectedName +
+                  ", while the target root was " + expectedName +
+                  ". Listen again and try humming the root note."
+                );
+              }
+
+              renderSequence();
+              updateScore();
+              updateCurrent();
+
+              if (index === progression.length - 1) {
+                $("swt-next").disabled = true;
+              }
+            }
+
+            capture();
+          })
+          .catch(error => {
+            busy = false;
+            $("swt-mic").disabled = false;
+            status(error.message || "Could not access the microphone.");
+          });
+      }
+
+      $("swt-new").addEventListener("click", generateProgression);
+
+      $("swt-play").addEventListener("click", function () {
+        playCurrentChord().catch(error => status(error.message));
+      });
+
+      $("swt-replay").addEventListener("click", function () {
+        playCurrentChord().catch(error => status(error.message));
+      });
+
+      $("swt-tonic").addEventListener("click", function () {
+        const tonic = keys[$("swt-key").value];
+        playMidiNotes([tonic, tonic + 4, tonic + 7])
+          .catch(error => status(error.message));
+      });
+
+      $("swt-mic").addEventListener("click", analyzeHumming);
+
+      $("swt-next").addEventListener("click", function () {
+        if (!results[index]) return;
+
+        if (index < progression.length - 1) {
+          index++;
+          updateCurrent();
+          status("Listen to the next chord, then hum its root note.");
+        } else {
+          status("Progression completed! Generate a new one to continue.");
+        }
+      });
+
+      $("swt-key").addEventListener("change", function () {
+        generateProgression();
+      });
+
+      generateProgression();
+    })();
+  </script>
+</section>
