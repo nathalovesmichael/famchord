@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harmonic Fluency Test (HFT)</title>
+    
+    <!-- Mengambil Font 'Poppins' -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* TEMA MAROON HIGH CONTRAST */
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background-color: #2a0010; 
+            color: #ffffff; 
+            text-align: center; 
+            padding: 20px; 
+            margin: 0;
+        }
+        
+        .screen { 
+            background: #5c0023; 
+            padding: 40px 30px; 
+            border-radius: 12px; 
+            border: 3px solid #ffcc00; 
+            display: inline-block; 
+            box-shadow: 0 0 25px rgba(255, 204, 0, 0.3); 
+            max-width: 650px; 
+            width: 100%; 
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        h1 { 
+            margin-top: 0; 
+            color: #ffcc00; 
+            font-weight: 900; 
+            text-transform: uppercase;
+            font-size: 28px;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 0px #2a0010; 
+        }
+        
+        h2 {
+            margin: 0 0 5px 0;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 700;
+        }
+        
+        .numpad { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 15px; 
+            margin-top: 30px; 
+        }
+        
+        .btn { 
+            background: #ffcc00; 
+            border: 3px solid #ffcc00; 
+            color: #2a0010; 
+            padding: 20px; 
+            font-size: 26px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: 0.1s; 
+            font-weight: 900; 
+            font-family: 'Poppins', sans-serif;
+            text-transform: uppercase;
+            box-shadow: 0 5px 0 #cc9900; 
+        }
+        
+        .btn:hover { 
+            background: #ffffff; 
+            border-color: #ffffff;
+            color: #5c0023;
+            transform: translateY(-2px);
+            box-shadow: 0 7px 0 #cccccc;
+        }
+        
+        .btn:active { 
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #cc9900;
+        }
+        
+        .btn:disabled { 
+            background: #3d0017; 
+            border-color: #2a0010;
+            color: #884455;
+            cursor: not-allowed; 
+            transform: none; 
+            box-shadow: none;
+        }
+
+        .help-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #2a0010;
+            color: #ffcc00;
+            border: 2px solid #ffcc00;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #cc9900;
+        }
+        
+        #status { 
+            font-size: 22px; 
+            margin: 20px 0; 
+            color: #00ffff; 
+            font-weight: 900; 
+        }
+        
+        #feedback { 
+            font-size: 16px; 
+            margin: 15px 0; 
+            min-height: 50px; 
+            color: #ffffff; 
+            background: #2a0010; 
+            padding: 15px; 
+            border-radius: 8px; 
+            border: 2px dashed #ffcc00;
+            font-weight: 700;
+        }
+        
+        #scoreBoard { 
+            margin-top: 30px; 
+            font-size: 20px; 
+            color: #ffffff; 
+            border-top: 3px solid #884455; 
+            padding-top: 20px; 
+            font-weight: 700;
+        }
+        
+        .highlight-score {
+            color: #00ffff; 
+            font-weight: 900;
+            font-size: 26px;
+        }
+
+        .tutorial-overlay {
+            display: flex; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(42, 0, 16, 0.9); 
+            justify-content: center;
+            align-items: center;
+        }
+
+        .tutorial-content {
+            background: #5c0023;
+            border: 4px solid #ffcc00;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            color: white;
+            text-align: left;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .tutorial-content h3 {
+            color: #ffcc00;
+            margin-top: 0;
+            font-size: 24px;
+            font-weight: 900;
+            text-align: center;
+            border-bottom: 2px dashed #884455;
+            padding-bottom: 10px;
+        }
+
+        .tutorial-content p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+
+        .tutorial-btn {
+            background: #00ffff; 
+            color: #003333;
+            border: none;
+            width: 100%;
+            padding: 15px;
+            font-size: 20px;
+            font-weight: 900;
+            border-radius: 8px;
+            margin-top: 20px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #009999;
+            text-transform: uppercase;
+        }
+
+        .tutorial-btn:hover {
+            background: #ffffff;
+            color: #000000;
+        }
+        .tutorial-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #009999;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PRE-LOAD AUDIO (Wajib ada biar suara di HP lancar) -->
+    <audio id="audio_1" src="1.wav" preload="auto"></audio>
+    <audio id="audio_2" src="2.wav" preload="auto"></audio>
+    <audio id="audio_3" src="3.wav" preload="auto"></audio>
+    <audio id="audio_4" src="4.wav" preload="auto"></audio>
+    <audio id="audio_5" src="5.wav" preload="auto"></audio>
+    <audio id="audio_6" src="6.wav" preload="auto"></audio>
+    <audio id="audio_7" src="7.wav" preload="auto"></audio>
+
+    <!-- LAYAR TUTORIAL -->
+    <div id="tutorialOverlay" class="tutorial-overlay">
+        <div class="tutorial-content">
+            <h3>🎹 CARA MAINNYA GINI, BRO!</h3>
+            <p><b>1. Dengerin:</b> Bakal ada bunyi chord yang diputer dari <i>family chord</i> <b>C Major</b>.</p>
+            <p><b>2. Tebak Cepat:</b> Pake kuping lo! Itu chord ke berapa? Sikat tombol angkanya di layar, atau <b>tekan angka 1-7 di keyboard lo!</b></p>
+            <p><b>3. Jangan Lemot:</b> Ujian ini ngetes refleks. Kalau lo mikir lebih dari <b>1.5 detik</b>, skor lo bakal disunat 40 poin!</p>
+            <p><b>4. Evaluasi AI:</b> Kalau salah, baca evaluasinya di layar biar insting lo makin tajam.</p>
+            <button class="tutorial-btn" onclick="closeTutorial()">PAHAM, GAS!</button>
+        </div>
+    </div>
+
+    <!-- LAYAR UTAMA -->
+    <div class="screen">
+        <button class="help-btn" onclick="openTutorial()">?</button>
+        
+        <h1>Harmonic Fluency Test</h1>
+        <h2>(HFT) - Section A: Real-Time Fluency</h2>
+        <p style="font-size: 14px; color: #ffb3c6; margin-top: 5px;">AUDIO TERKALIBRASI DI SCALE: <span style="color:#ffffff; font-weight:bold;">C MAJOR</span></p>
+        
+        <button class="btn" id="startBtn" style="width: 100%; margin-top: 15px; background: #00ffff; border-color: #00ffff; color: #003333; box-shadow: 0 5px 0 #009999;" onclick="startRound()">MULAI UJIAN (NYALAKAN SPEAKER)</button>
+        
+        <div id="status">Sistem Standby. Tekan mulai.</div>
+        <div id="feedback">Layar Evaluasi AI</div>
+        
+        <div class="numpad">
+            <button class="btn num-btn" onclick="checkAnswer(1)" disabled>1</button>
+            <button class="btn num-btn" onclick="checkAnswer(2)" disabled>2</button>
+            <button class="btn num-btn" onclick="checkAnswer(3)" disabled>3</button>
+            <button class="btn num-btn" onclick="checkAnswer(4)" disabled>4</button>
+            <button class="btn num-btn" onclick="checkAnswer(5)" disabled>5</button>
+            <button class="btn num-btn" onclick="checkAnswer(6)" disabled>6</button>
+            <button class="btn num-btn" onclick="checkAnswer(7)" style="grid-column: span 3;" disabled>7</button>
+        </div>
+
+        <div id="scoreBoard">
+            SKOR TOTAL: <span id="score" class="highlight-score">0</span> &nbsp;|&nbsp; LATENCY: <span id="latency" style="color:#ffcc00;">-</span> ms
+        </div>
+    </div>
+
+    <script>
+        function closeTutorial() { document.getElementById('tutorialOverlay').style.display = 'none'; }
+        function openTutorial() { document.getElementById('tutorialOverlay').style.display = 'flex'; }
+
+        const progressions = [
+            [1, 6, 4, 5], [1, 5, 6, 4], [6, 4, 1, 5], [2, 5, 1, 6], 
+            [4, 5, 3, 6], [1, 4, 6, 5], [3, 6, 2, 5, 1], [4, 1, 4, 5]
+        ];
+        const appreciations = ["🎹 GOKIL!", "🎹 SEMPURNA!", "🎹 TRANSISI MULUS!", "🎹 REFLEKS DEWA!"];
+
+        let currentProgression = [];
+        let currentStep = 0;
+        let score = 0;
+        let startTime = 0;
+        let isPlaying = false;
+        let canAnswer = false;
+
+        document.addEventListener('keydown', function(event) {
+            if (isPlaying && canAnswer) {
+                const key = event.key;
+                if (key >= '1' && key <= '7') checkAnswer(parseInt(key));
+            }
+        });
+
+        function toggleButtons(state) {
+            canAnswer = state; 
+            let btns = document.querySelectorAll('.num-btn');
+            btns.forEach(btn => btn.disabled = !state);
+        }
+
+        // FUNGSI AUDIO KHUSUS HP & LAPTOP
+        function playChordSound(chordNumber) {
+            let audio = document.getElementById('audio_' + chordNumber);
+            if (audio) {
+                audio.currentTime = 0; // Reset audio ke detik ke-0 (biar bisa di-spam)
+                audio.play().catch(error => console.log("Audio diblokir browser, pastikan user sudah klik layar."));
+            }
+        }
+
+        function startRound() {
+            document.getElementById('startBtn').style.display = 'none';
+            
+            // Trik khusus HP: Play silence/audio kosong sejenak biar browser ngasih izin audio seterusnya
+            document.getElementById('audio_1').play().then(() => {
+                document.getElementById('audio_1').pause();
+                document.getElementById('audio_1').currentTime = 0;
+            }).catch(e => {});
+
+            currentProgression = progressions[Math.floor(Math.random() * progressions.length)];
+            currentStep = 0;
+            isPlaying = true;
+
+            document.getElementById('status').innerHTML = `KEY AKTIF: <span style="color:#ffffff;">C MAJOR</span>`;
+            document.getElementById('status').style.color = "#ffcc00";
+            document.getElementById('feedback').innerHTML = "<span style='color:#00ffff;'>Bersiap mendengarkan chord pertama...</span>";
+            
+            toggleButtons(true);
+            setTimeout(nextChord, 2000); 
+        }
+
+        function nextChord() {
+            if (currentStep >= currentProgression.length) {
+                document.getElementById('status').innerHTML = "<span style='color:#00ffff;'>RONDE SELESAI!</span>";
+                document.getElementById('startBtn').style.display = 'block';
+                document.getElementById('startBtn').innerText = 'LANJUT PROGRESI BERIKUTNYA';
+                toggleButtons(false);
+                isPlaying = false;
+                return;
+            }
+
+            let targetChord = currentProgression[currentStep];
+            document.getElementById('status').innerHTML = `<span style='color:#00ffff;'>🎹 MENEBAK CHORD KE-${currentStep + 1}...</span>`;
+            
+            playChordSound(targetChord);
+            startTime = Date.now(); 
+        }
+
+        function getEvaluation(user, correct) {
+            const minor = [2, 3, 6];
+            const major = [1, 4, 5];
+            
+            if (minor.includes(correct) && major.includes(user)) {
+                return `Lo nebak Major (terang), padahal aslinya minor (gelap).`;
+            } else if (major.includes(correct) && minor.includes(user)) {
+                return `Lo nebak minor, padahal aslinya Major (megah).`;
+            } else if (correct === 5 && user === 4) {
+                return `Kejebak! Chord 5 (G) pengen resolve ke 1 (C). Chord 4 (F) cuma numpang lewat.`;
+            } else {
+                return `Fokus dengarkan nada BASS paling bawah untuk menebak ROOT-nya.`;
+            }
+        }
+
+        function checkAnswer(userAnswer) {
+            if (!isPlaying || !canAnswer) return;
+
+            let reactionTime = Date.now() - startTime;
+            let correctAnswer = currentProgression[currentStep];
+            let feedbackEl = document.getElementById('feedback');
+
+            if (userAnswer === correctAnswer) {
+                let points = 100;
+                let penaltyText = "";
+                
+                if (reactionTime > 1500) { 
+                    points -= 40; 
+                    penaltyText = "<br><span style='color:#ffcc00; font-size:14px;'>(TELAT MIKIR! POIN DIKURANGI 40)</span>";
+                }
+                score += points;
+                
+                let randomAppreciation = appreciations[Math.floor(Math.random() * appreciations.length)];
+                feedbackEl.innerHTML = `<span style="color:#00ffff; font-weight:900; font-size:18px;">${randomAppreciation} TEPAT! +${points}</span> ${penaltyText}`;
+            } else {
+                let evaluasi = getEvaluation(userAnswer, correctAnswer);
+                feedbackEl.innerHTML = `❌ <span style="color:#ff3333; font-size:18px; font-weight:900;">SALAH! HARUSNYA CHORD ${correctAnswer}.</span><br><span style="color:#ffb3c6; font-size:14px;">💡 ${evaluasi}</span>`;
+            }
+
+            document.getElementById('score').innerText = score;
+            document.getElementById('latency').innerText = reactionTime;
+
+            currentStep++;
+            toggleButtons(false); 
+            
+            setTimeout(() => {
+                toggleButtons(true);
+                nextChord();
+            }, 2000); 
+        }
+    </script>
+</body>
+</html>
